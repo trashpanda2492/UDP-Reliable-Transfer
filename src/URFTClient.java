@@ -28,6 +28,8 @@ public class URFTClient {
 
 				packet.setFileSize(file.length());
 				//packet.setFileData(fileBuffer);
+				int segments = (int)Math.ceil(file.length()/512);
+				System.out.println("Number of segments: " + segments);
 				int seq = 0;
 				int bytesRead = 0;
 				int bytesLeft =  fileBuffer.length;
@@ -43,6 +45,7 @@ public class URFTClient {
 					packet.setFileData(payload);
 					packet.setSeq(seq);
 					packet.setPayloadSize(payload.length);
+					objectOutput.writeInt(segments);
 					objectOutput.writeObject(packet);
 					byte[] packetBytes = output.toByteArray();
 					DatagramPacket upload = new DatagramPacket(packetBytes, packetBytes.length, IPAddress, port);
