@@ -3,6 +3,8 @@ import java.net.*;
 import static java.lang.System.out;
 
 public class URFTServer {
+	private FileEvent fileEvent = null;
+	
 	class FileEvent implements Serializable {
 		private static final long serialVersionUID = 1L;
 		
@@ -69,23 +71,50 @@ public class URFTServer {
 			byte[] incomingData = new byte[512];
 			while (true) {
 				DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
-				try {
-					socket.receive(incomingPacket);
-					byte[] data = incomingPacket.getData();
-					ByteArrayInputStream in = new ByteArrayInputStream(data);
-					ObjectInputStream is = new ObjectInputStream(in);
-				} catch (IOException e) {
-					e.printStackTrace();
+				socket.receive(incomingPacket);
+				byte[] data = incomingPacket.getData();
+				ByteArrayInputStream in = new ByteArrayInputStream(data);
+				ObjectInputStream is = new ObjectInputStream(in);
+				fileEvent = (FileEvent) is.readObject();
+				if (fileEvent.getStatus().equalsIgnoreCase("Error")) {
+					out.println("Error occurred while packing the data on client side.");
+					System.exit(0);
 				}
+				createAndWriteFile(); // write the file to server dir
 			}
 		} catch(SocketException se) {
 			se.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	} // createSocketAndListen
+	
+	public void createAndWriteFile() {
+		String outputFile = fileEvent.getDestinationDirectory() + fileEvent.getFilename();
+		if (!new File(fileEvent.getDestinationDirectory()).exists()) {
+			new File(fileEvent.getDestinationDirectory()).mkdirs();
+		}
+		File dstFile = new File(outputFile);
+		FileOutputStream fileOutputStream = null;
+		try {
+			fileOutputStream = new FileOutputStream(dstFile);
+			fileOutputStream.write(fileEvent.getFileData());
+			fileOutputStream.flush();
+			fileOutputStream.close();
+			out.println("Output file : " + outputFile + " is successfully saved ");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	
 	public static void main(String[] args) {
 		if (args.length != 4) {
 			out.println("Usage: java URFTServer -p <port_number> -o <server_dir_path>");
+			System.exit(0);
 		}
 		URFTServer server = new URFTServer();
 		server.createSocketAndListen(Integer.parseInt(args[1]));
