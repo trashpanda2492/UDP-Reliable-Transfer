@@ -24,6 +24,7 @@ public class URFTServer {
 				}
 				createAndWriteFile(path); // write the file to server dir
 				
+<<<<<<< HEAD
 				// send back ACK
 				InetAddress IPAddress = incomingPacket.getAddress();
 				int incomingPort = incomingPacket.getPort();
@@ -31,6 +32,19 @@ public class URFTServer {
 				byte[] replyBytes = reply.getBytes();
 				DatagramPacket replyPacket = new DatagramPacket(replyBytes, replyBytes.length, IPAddress, incomingPort);
 				socket.send(replyPacket);
+=======
+				UDPPacket responsePacket = new UDPPacket();
+				responsePacket.setStatus("Done");
+				ByteArrayOutputStream output = new ByteArrayOutputStream();
+				ObjectOutputStream objectOutput = new ObjectOutputStream(output);
+				objectOutput.writeObject(responsePacket);
+				byte[] packetBytes = output.toByteArray();
+				
+				DatagramPacket response = new DatagramPacket(packetBytes, packetBytes.length, incomingPacket.getAddress(), incomingPacket.getPort());
+				socket.send(response);
+				System.out.println("Response has been sent successfully!");
+				
+>>>>>>> f24fbcddec168089c57d158949eb88d1e93e1286
 			}
 		} catch(SocketException se) {
 			se.printStackTrace();
