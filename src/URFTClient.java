@@ -1,5 +1,4 @@
 import java.net.*;
-import java.nio.file.Files;
 import java.io.*;
 
 public class URFTClient {
@@ -10,9 +9,7 @@ public class URFTClient {
 		String filePath = args[5];
 
 		try {
-			DatagramSocket dataSocket = new DatagramSocket();
 			InetAddress IPAddress = InetAddress.getByName(ip);
-			byte[] input = new byte[512];
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
 			ObjectOutputStream objectOutput = new ObjectOutputStream(output);
 
@@ -34,16 +31,23 @@ public class URFTClient {
 				objectOutput.writeObject(packet);
 				byte[] packetBytes = output.toByteArray();
 				
+				DatagramSocket dataSocket = new DatagramSocket();
 				DatagramPacket upload = new DatagramPacket(packetBytes, packetBytes.length, IPAddress, port);
 				dataSocket.send(upload);
 				System.out.println("File has been uploaded from client");
 				
-				DatagramPacket inputPacket = new DatagramPacket(input, input.length);
+				byte[] response = new byte[512];
+				DatagramPacket inputPacket = new DatagramPacket(response, response.length);
 				dataSocket.receive(inputPacket);
-				String response = new String(inputPacket.getData());
+				ByteArrayInputStream in = new ByteArrayInputStream(response);
+				ObjectInputStream is = new ObjectInputStream(in);
+				UDPPacket responsePacket = (UDPPacket) is.readObject();
+				String ACK = new String(responsePacket.getStatus());
 			
-				System.out.println("Response from server: " + response);
-				Thread.sleep(1000);
+				System.out.println("Response from server: " + ACK);
+				Thread.sleep(100);
+				
+				
 				System.exit(0);
 			
 			}
@@ -61,6 +65,9 @@ public class URFTClient {
 			System.out.println("Failed to create output stream!");
 			e.printStackTrace();
 		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

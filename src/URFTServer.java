@@ -18,6 +18,18 @@ public class URFTServer {
 				ObjectInputStream is = new ObjectInputStream(in);
 				packet = (UDPPacket) is.readObject();
 				createAndWriteFile(path); // write the file to server dir
+				
+				UDPPacket responsePacket = new UDPPacket();
+				responsePacket.setStatus("Done");
+				ByteArrayOutputStream output = new ByteArrayOutputStream();
+				ObjectOutputStream objectOutput = new ObjectOutputStream(output);
+				objectOutput.writeObject(responsePacket);
+				byte[] packetBytes = output.toByteArray();
+				
+				DatagramPacket response = new DatagramPacket(packetBytes, packetBytes.length, incomingPacket.getAddress(), incomingPacket.getPort());
+				socket.send(response);
+				System.out.println("Response has been sent successfully!");
+				
 			}
 		} catch(SocketException se) {
 			se.printStackTrace();
