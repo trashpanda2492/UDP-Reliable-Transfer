@@ -17,10 +17,6 @@ public class URFTServer {
 				ByteArrayInputStream in = new ByteArrayInputStream(data);
 				ObjectInputStream is = new ObjectInputStream(in);
 				packet = (UDPPacket) is.readObject();
-				if (packet.getStatus().equalsIgnoreCase("Error")) {
-					out.println("Error occurred while packing the data on client side.");
-					System.exit(0);
-				}
 				createAndWriteFile(path); // write the file to server dir
 			}
 		} catch(SocketException se) {

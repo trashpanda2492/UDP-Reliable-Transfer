@@ -2,7 +2,7 @@ import java.net.*;
 import java.nio.file.Files;
 import java.io.*;
 
-public class Client {
+public class URFTClient {
 
 	public static void main(String[] args) {
 		String ip = args[1];
