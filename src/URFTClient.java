@@ -24,52 +24,6 @@ public class URFTClient {
 				
 				int bytes = 0, offset = 0;
 				byte[] fileBuffer = new byte[(int)file.length()];
-<<<<<<< HEAD
-				// read file data into fileBuffer
-				while(bytes < fileBuffer.length && (offset = di.read(fileBuffer, bytes, fileBuffer.length - bytes)) >= 0){
-					bytes += offset;
-				}
-				int segments = (int)Math.ceil(fileBuffer.length/512);
-				int start = 0, end = 511;
-				byte[] payload;
-				for (int i = 0; i < segments; i++) {
-					if (i == segments - 1) {
-						end += fileBuffer.length - start;
-						packet.setFileSize(end - start + 1);
-						payload = Arrays.copyOfRange(fileBuffer, start, end);
-					}
-					else {
-						end += 512;
-						packet.setFileSize(512);
-						payload = Arrays.copyOfRange(fileBuffer, start, end);
-					}
-					packet.setFileData(payload);
-					packet.setSeq(start);
-					start += 512;
-					objectOutput.writeInt(segments);
-					objectOutput.writeObject(packet);
-					byte[] packetBytes = output.toByteArray();
-					
-					DatagramPacket upload = new DatagramPacket(packetBytes, packetBytes.length, IPAddress, port);
-					dataSocket.send(upload);
-					out.println("Packet " + start + " sent from client.");
-				}
-				
-				// receive ACKs from server
-				dataSocket.setSoTimeout(1000);
-				int lastACK = 0;
-				while (lastACK != fileBuffer.length) {
-					DatagramPacket inputPacket = new DatagramPacket(input, input.length);
-					try {
-						dataSocket.receive(inputPacket);
-					} catch (SocketTimeoutException e) {
-						continue;
-					}
-					String response = new String(inputPacket.getData());
-					lastACK = Integer.parseInt(response);
-					out.println("Received ACK: " + lastACK);
-				}
-=======
 				while(bytes < fileBuffer .length && (offset = di.read(fileBuffer, bytes, fileBuffer.length - bytes)) >= 0){
 					bytes += offset;
 				}
@@ -94,9 +48,7 @@ public class URFTClient {
 			
 				System.out.println("Acknowledge from server: " + ACK);
 				Thread.sleep(100);
-				
-				
->>>>>>> f24fbcddec168089c57d158949eb88d1e93e1286
+
 				System.exit(0);
 			
 			}
