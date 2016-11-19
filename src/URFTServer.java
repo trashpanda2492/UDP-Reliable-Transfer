@@ -5,66 +5,7 @@ import static java.lang.System.out;
 public class URFTServer {
 	private UDPPacket packet = null;
 	
-	class UDPPacket implements Serializable {
-		private static final long serialVersionUID = 1L;
-		
-		private String destinationDirectory;
-		private String sourceDirectory;
-		private String filename;
-		private long fileSize;
-		private byte[] fileData;
-		private String status;
-		
-		public String getDestinationDirectory() {
-			return destinationDirectory;
-		}
-
-		public void setDestinationDirectory(String destinationDirectory) {
-			this.destinationDirectory = destinationDirectory;
-		}
-
-		public String getSourceDirectory() {
-			return sourceDirectory;
-		}
-
-		public void setSourceDirectory(String sourceDirectory) {
-			this.sourceDirectory = sourceDirectory;
-		}
-
-		public String getFilename() {
-			return filename;
-		}
-
-		public void setFilename(String filename) {
-			this.filename = filename;
-		}
-
-		public long getFileSize() {
-			return fileSize;
-		}
-
-		public void setFileSize(long fileSize) {
-			this.fileSize = fileSize;
-		}
-
-		public String getStatus() {
-		return status;
-		}
-
-		public void setStatus(String status) {
-			this.status = status;
-		}
-
-		public byte[] getFileData() {
-			return fileData;
-		}
-
-		public void setFileData(byte[] fileData) {
-			this.fileData = fileData;
-		}
-	} // UDPPacket class
-	
-	public void createSocketAndListen(int port) {
+	public void createSocketAndListen(int port, String path) {
 		try {
 			DatagramSocket socket = new DatagramSocket(port);
 			out.println("Server listening on port " + port);
@@ -80,7 +21,7 @@ public class URFTServer {
 					out.println("Error occurred while packing the data on client side.");
 					System.exit(0);
 				}
-				createAndWriteFile(); // write the file to server dir
+				createAndWriteFile(path); // write the file to server dir
 			}
 		} catch(SocketException se) {
 			se.printStackTrace();
@@ -91,11 +32,8 @@ public class URFTServer {
 		}
 	} // createSocketAndListen
 	
-	public void createAndWriteFile() {
-		String outputFile = packet.getDestinationDirectory() + packet.getFilename();
-		if (!new File(packet.getDestinationDirectory()).exists()) {
-			new File(packet.getDestinationDirectory()).mkdirs();
-		}
+	public void createAndWriteFile(String path) {
+		String outputFile = path + "/" + packet.getFilename();
 		File dstFile = new File(outputFile);
 		FileOutputStream fileOutputStream = null;
 		try {
@@ -117,6 +55,6 @@ public class URFTServer {
 			System.exit(0);
 		}
 		URFTServer server = new URFTServer();
-		server.createSocketAndListen(Integer.parseInt(args[1]));
+		server.createSocketAndListen(Integer.parseInt(args[1]), args[3]);
 	} // main
 } // URFTServer
