@@ -3,9 +3,9 @@ import java.net.*;
 import static java.lang.System.out;
 
 public class URFTServer {
-	private FileInfo fileInfo = null;
+	private UDPPacket packet = null;
 	
-	class FileInfo implements Serializable {
+	class UDPPacket implements Serializable {
 		private static final long serialVersionUID = 1L;
 		
 		private String destinationDirectory;
@@ -62,7 +62,7 @@ public class URFTServer {
 		public void setFileData(byte[] fileData) {
 			this.fileData = fileData;
 		}
-	} // FileEvent class
+	} // UDPPacket class
 	
 	public void createSocketAndListen(int port) {
 		try {
@@ -75,8 +75,8 @@ public class URFTServer {
 				byte[] data = incomingPacket.getData();
 				ByteArrayInputStream in = new ByteArrayInputStream(data);
 				ObjectInputStream is = new ObjectInputStream(in);
-				fileInfo = (FileInfo) is.readObject();
-				if (fileInfo.getStatus().equalsIgnoreCase("Error")) {
+				packet = (UDPPacket) is.readObject();
+				if (packet.getStatus().equalsIgnoreCase("Error")) {
 					out.println("Error occurred while packing the data on client side.");
 					System.exit(0);
 				}
@@ -92,24 +92,24 @@ public class URFTServer {
 	} // createSocketAndListen
 	
 	public void createAndWriteFile() {
-		String outputFile = fileInfo.getDestinationDirectory() + fileInfo.getFilename();
-		if (!new File(fileInfo.getDestinationDirectory()).exists()) {
-			new File(fileInfo.getDestinationDirectory()).mkdirs();
+		String outputFile = packet.getDestinationDirectory() + packet.getFilename();
+		if (!new File(packet.getDestinationDirectory()).exists()) {
+			new File(packet.getDestinationDirectory()).mkdirs();
 		}
 		File dstFile = new File(outputFile);
 		FileOutputStream fileOutputStream = null;
 		try {
 			fileOutputStream = new FileOutputStream(dstFile);
-			fileOutputStream.write(fileInfo.getFileData());
+			fileOutputStream.write(packet.getFileData());
 			fileOutputStream.flush();
 			fileOutputStream.close();
-			out.println("Output file : " + outputFile + " is successfully saved ");
+			out.println("Output file : " + outputFile + " was successfully saved ");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
+	} // createAndWriteFile
 	
 	public static void main(String[] args) {
 		if (args.length != 4) {
