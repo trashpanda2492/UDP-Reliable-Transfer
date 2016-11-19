@@ -3,9 +3,9 @@ import java.net.*;
 import static java.lang.System.out;
 
 public class URFTServer {
-	private FileEvent fileEvent = null;
+	private FileInfo fileInfo = null;
 	
-	class FileEvent implements Serializable {
+	class FileInfo implements Serializable {
 		private static final long serialVersionUID = 1L;
 		
 		private String destinationDirectory;
@@ -75,8 +75,8 @@ public class URFTServer {
 				byte[] data = incomingPacket.getData();
 				ByteArrayInputStream in = new ByteArrayInputStream(data);
 				ObjectInputStream is = new ObjectInputStream(in);
-				fileEvent = (FileEvent) is.readObject();
-				if (fileEvent.getStatus().equalsIgnoreCase("Error")) {
+				fileInfo = (FileInfo) is.readObject();
+				if (fileInfo.getStatus().equalsIgnoreCase("Error")) {
 					out.println("Error occurred while packing the data on client side.");
 					System.exit(0);
 				}
@@ -92,15 +92,15 @@ public class URFTServer {
 	} // createSocketAndListen
 	
 	public void createAndWriteFile() {
-		String outputFile = fileEvent.getDestinationDirectory() + fileEvent.getFilename();
-		if (!new File(fileEvent.getDestinationDirectory()).exists()) {
-			new File(fileEvent.getDestinationDirectory()).mkdirs();
+		String outputFile = fileInfo.getDestinationDirectory() + fileInfo.getFilename();
+		if (!new File(fileInfo.getDestinationDirectory()).exists()) {
+			new File(fileInfo.getDestinationDirectory()).mkdirs();
 		}
 		File dstFile = new File(outputFile);
 		FileOutputStream fileOutputStream = null;
 		try {
 			fileOutputStream = new FileOutputStream(dstFile);
-			fileOutputStream.write(fileEvent.getFileData());
+			fileOutputStream.write(fileInfo.getFileData());
 			fileOutputStream.flush();
 			fileOutputStream.close();
 			out.println("Output file : " + outputFile + " is successfully saved ");
