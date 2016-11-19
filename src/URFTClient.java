@@ -34,7 +34,7 @@ public class URFTClient {
 				DatagramSocket dataSocket = new DatagramSocket();
 				DatagramPacket upload = new DatagramPacket(packetBytes, packetBytes.length, IPAddress, port);
 				dataSocket.send(upload);
-				System.out.println("File has been uploaded from client");
+				System.out.println("File packet (Sequence number " + packet.getSeq() + " has been uploaded from client");
 				
 				byte[] response = new byte[512];
 				DatagramPacket inputPacket = new DatagramPacket(response, response.length);
@@ -42,9 +42,9 @@ public class URFTClient {
 				ByteArrayInputStream in = new ByteArrayInputStream(response);
 				ObjectInputStream is = new ObjectInputStream(in);
 				UDPPacket responsePacket = (UDPPacket) is.readObject();
-				String ACK = new String(responsePacket.getStatus());
+				int ACK = responsePacket.getAck();
 			
-				System.out.println("Response from server: " + ACK);
+				System.out.println("Acknowledge from server: " + ACK);
 				Thread.sleep(100);
 				
 				

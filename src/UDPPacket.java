@@ -3,19 +3,12 @@ import java.io.Serializable;
 public class UDPPacket implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	private String sourceDirectory;
 	private String filename;
 	private long fileSize;
 	private byte[] fileData;
 	private String status;
-
-	public String getSourceDirectory() {
-		return sourceDirectory;
-	}
-
-	public void setSourceDirectory(String sourceDirectory) {
-		this.sourceDirectory = sourceDirectory;
-	}
+	private int seq;
+	private int ack;
 
 	public String getFilename() {
 		return filename;
@@ -47,5 +40,21 @@ public class UDPPacket implements Serializable {
 
 	public void setFileData(byte[] fileData) {
 		this.fileData = fileData;
+	}
+	
+	public int getSeq() {
+		return this.seq;
+	}
+	
+	public void setSeq(int seq) {
+		this.seq = seq;
+	}
+	
+	public int getAck() {
+		return this.ack;
+	}
+	
+	public void setAck(int ack) {
+		this.ack = ack;
 	}
 } // UDPPacket class
