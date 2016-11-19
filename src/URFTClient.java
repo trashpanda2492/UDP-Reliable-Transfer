@@ -1,7 +1,6 @@
 import java.net.*;
 import java.util.Arrays;
 import java.io.*;
-import static java.lang.System.out;
 
 public class URFTClient {
 
@@ -12,63 +11,77 @@ public class URFTClient {
 
 		try {
 			InetAddress IPAddress = InetAddress.getByName(ip);
-			ByteArrayOutputStream output = new ByteArrayOutputStream();
-			ObjectOutputStream objectOutput = new ObjectOutputStream(output);
 
 			File file = new File(filePath);
 			if(file.exists()){
-				UDPPacket packet = new UDPPacket();
 				String fileName = filePath.substring(filePath.lastIndexOf('/')+1, filePath.length());
+				UDPPacket packet = new UDPPacket();
 				packet.setFilename(fileName);
 				DataInputStream di = new DataInputStream(new FileInputStream(file));
-				
+				DatagramSocket dataSocket = new DatagramSocket();
+
 				int bytes = 0, offset = 0;
 				byte[] fileBuffer = new byte[(int)file.length()];
 				while(bytes < fileBuffer .length && (offset = di.read(fileBuffer, bytes, fileBuffer.length - bytes)) >= 0){
 					bytes += offset;
 				}
+
 				packet.setFileSize(file.length());
-				packet.setFileData(fileBuffer);
-				
-				objectOutput.writeObject(packet);
-				byte[] packetBytes = output.toByteArray();
-				
-				DatagramSocket dataSocket = new DatagramSocket();
-				DatagramPacket upload = new DatagramPacket(packetBytes, packetBytes.length, IPAddress, port);
-				dataSocket.send(upload);
-				System.out.println("File packet (Sequence number " + packet.getSeq() + " has been uploaded from client");
+				//packet.setFileData(fileBuffer);
+				int seq = 0;
+				int bytesRead = 0;
+				int bytesLeft =  fileBuffer.length;
+				while(bytesRead < fileBuffer.length){
+					ByteArrayOutputStream output = new ByteArrayOutputStream();
+					ObjectOutputStream objectOutput = new ObjectOutputStream(output);
+					byte[] payload = new byte[512];
+					if(bytesLeft <= 512){
+						payload = Arrays.copyOfRange(fileBuffer, seq * 512, fileBuffer.length);
+					}else{
+						payload = Arrays.copyOfRange(fileBuffer, seq *512, seq*512 + 512);
+					}
+					packet.setFileData(payload);
+					packet.setSeq(seq);
+					packet.setPayloadSize(payload.length);
+					objectOutput.writeObject(packet);
+					byte[] packetBytes = output.toByteArray();
+					DatagramPacket upload = new DatagramPacket(packetBytes, packetBytes.length, IPAddress, port);
+					dataSocket.send(upload);
+					System.out.println("File packet (Sequence number " + seq + " has been uploaded from client");
+					bytesRead += payload.length;
+					seq ++;
+					bytesLeft -= payload.length;		
+				}
 				
 				byte[] response = new byte[512];
 				DatagramPacket inputPacket = new DatagramPacket(response, response.length);
 				dataSocket.receive(inputPacket);
-				ByteArrayInputStream in = new ByteArrayInputStream(response);
-				ObjectInputStream is = new ObjectInputStream(in);
-				UDPPacket responsePacket = (UDPPacket) is.readObject();
-				int ACK = responsePacket.getAck();
-			
-				System.out.println("Acknowledge from server: " + ACK);
-				Thread.sleep(100);
+				String ACK = new String(inputPacket.getData());
+				//if(!ACK.equalsIgnoreCase("done")){
+					System.out.println("Acknowledge from server: " + ACK);
+				//}
+				//else{
+				//	dataSocket.close();
+				//	di.close();
+				//	System.exit(0);
+				//}
 
-				System.exit(0);
-			
+
 			}
 			else{
-				out.println("File not found!");
+				System.out.println("File not found!");
 				System.exit(0);
 			}
 		} catch (SocketException e) {
-			out.println("Failed to create socket! ");
+			System.out.println("Failed to create soket! ");
 			e.printStackTrace();
 		} catch (UnknownHostException e) {
-			out.println("Failed to parse the IP address from input argument! ");
+			System.out.println("Failed to parse the IP address from input argument! ");
 			e.printStackTrace();
 		} catch (IOException e) {
-			out.println("Failed to create output stream!");
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
+			System.out.println("Failed to create output stream!");
 			e.printStackTrace();
 		}
 	}
+
 }
