@@ -7,7 +7,7 @@ public class UDPPacket implements Serializable {
 	private long fileSize;
 	private byte[] fileData;
 	private int seq;
-	private int ack;
+	private int payloadSize;
 
 	public String getFilename() {
 		return filename;
@@ -41,11 +41,11 @@ public class UDPPacket implements Serializable {
 		this.seq = seq;
 	}
 	
-	public int getAck() {
-		return this.ack;
+	public int getPayloadSize() {
+		return this.payloadSize;
 	}
 	
-	public void setAck(int ack) {
-		this.ack = ack;
+	public void setPayloadSize(int payloadSize) {
+		this.payloadSize = payloadSize;
 	}
 } // UDPPacket class
