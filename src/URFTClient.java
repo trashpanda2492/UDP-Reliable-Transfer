@@ -1,5 +1,7 @@
 import java.net.*;
+import java.util.Arrays;
 import java.io.*;
+import static java.lang.System.out;
 
 public class URFTClient {
 
@@ -24,41 +26,64 @@ public class URFTClient {
 				
 				int bytes = 0, offset = 0;
 				byte[] fileBuffer = new byte[(int)file.length()];
+				// read file data into fileBuffer
 				while(bytes < fileBuffer.length && (offset = di.read(fileBuffer, bytes, fileBuffer.length - bytes)) >= 0){
 					bytes += offset;
 				}
-				packet.setFileSize(file.length());
-				packet.setFileData(fileBuffer);
+				int segments = (int)Math.ceil(fileBuffer.length/512);
+				int start = 0, end = 511;
+				byte[] payload;
+				for (int i = 0; i < segments; i++) {
+					if (i == segments - 1) {
+						end += fileBuffer.length - start;
+						packet.setFileSize(end - start + 1);
+						payload = Arrays.copyOfRange(fileBuffer, start, end);
+					}
+					else {
+						end += 512;
+						packet.setFileSize(512);
+						payload = Arrays.copyOfRange(fileBuffer, start, end);
+					}
+					packet.setFileData(payload);
+					packet.setSeq(start);
+					start += 512;
+					objectOutput.writeInt(segments);
+					objectOutput.writeObject(packet);
+					byte[] packetBytes = output.toByteArray();
+					
+					DatagramPacket upload = new DatagramPacket(packetBytes, packetBytes.length, IPAddress, port);
+					dataSocket.send(upload);
+					out.println("Packet " + start + " sent from client.");
+				}
 				
-				objectOutput.writeObject(packet);
-				byte[] packetBytes = output.toByteArray();
-				
-				DatagramPacket upload = new DatagramPacket(packetBytes, packetBytes.length, IPAddress, port);
-				dataSocket.send(upload);
-				System.out.println("File has been uploaded from client");
-				
-				/*DatagramPacket inputPacket = new DatagramPacket(input, input.length);
-				dataSocket.receive(inputPacket);
-				String response = new String(inputPacket.getData());
-			
-				System.out.println("Response from server: " + response);*/
-				Thread.sleep(1000);
+				// receive ACKs from server
+				dataSocket.setSoTimeout(1000);
+				int lastACK = 0;
+				while (lastACK != fileBuffer.length) {
+					DatagramPacket inputPacket = new DatagramPacket(input, input.length);
+					try {
+						dataSocket.receive(inputPacket);
+					} catch (SocketTimeoutException e) {
+						continue;
+					}
+					String response = new String(inputPacket.getData());
+					lastACK = Integer.parseInt(response);
+					out.println("Received ACK: " + lastACK);
+				}
 				System.exit(0);
 			}
 			else{
-				System.out.println("File not found!");
+				out.println("File not found!");
 				System.exit(0);
 			}
 		} catch (SocketException e) {
-			System.out.println("Failed to create socket! ");
+			out.println("Failed to create socket! ");
 			e.printStackTrace();
 		} catch (UnknownHostException e) {
-			System.out.println("Failed to parse the IP address from input argument! ");
+			out.println("Failed to parse the IP address from input argument! ");
 			e.printStackTrace();
 		} catch (IOException e) {
-			System.out.println("Failed to create output stream!");
-			e.printStackTrace();
-		} catch (InterruptedException e) {
+			out.println("Failed to create output stream!");
 			e.printStackTrace();
 		}
 	}

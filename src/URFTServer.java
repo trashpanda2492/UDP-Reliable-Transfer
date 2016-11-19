@@ -4,8 +4,10 @@ import static java.lang.System.out;
 
 public class URFTServer {
 	private UDPPacket packet = null;
+	private int ACK = 0;
 	
 	public void createSocketAndListen(int port, String path) {
+		int count;
 		try {
 			DatagramSocket socket = new DatagramSocket(port);
 			out.println("Server listening on port " + port);
@@ -16,8 +18,19 @@ public class URFTServer {
 				byte[] data = incomingPacket.getData();
 				ByteArrayInputStream in = new ByteArrayInputStream(data);
 				ObjectInputStream is = new ObjectInputStream(in);
-				packet = (UDPPacket) is.readObject();
+				count = is.readInt();
+				for (int i = 0; i < count; i++) {
+					packet = (UDPPacket) is.readObject();
+				}
 				createAndWriteFile(path); // write the file to server dir
+				
+				// send back ACK
+				InetAddress IPAddress = incomingPacket.getAddress();
+				int incomingPort = incomingPacket.getPort();
+				String reply = "" + ACK;
+				byte[] replyBytes = reply.getBytes();
+				DatagramPacket replyPacket = new DatagramPacket(replyBytes, replyBytes.length, IPAddress, incomingPort);
+				socket.send(replyPacket);
 			}
 		} catch(SocketException se) {
 			se.printStackTrace();
@@ -32,6 +45,7 @@ public class URFTServer {
 		String outputFile = path + "/" + packet.getFilename();
 		File dstFile = new File(outputFile);
 		FileOutputStream fileOutputStream = null;
+		ACK = packet.getSeq() + (int)packet.getFileSize();
 		try {
 			fileOutputStream = new FileOutputStream(dstFile);
 			fileOutputStream.write(packet.getFileData());
