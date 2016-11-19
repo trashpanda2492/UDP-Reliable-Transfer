@@ -57,33 +57,18 @@ public class URFTClient {
 				System.exit(0);
 			}
 		} catch (SocketException e) {
-<<<<<<< HEAD
 			out.println("Failed to create socket! ");
-=======
-			System.out.println("Failed to create soket! ");
->>>>>>> f24fbcddec168089c57d158949eb88d1e93e1286
 			e.printStackTrace();
 		} catch (UnknownHostException e) {
 			out.println("Failed to parse the IP address from input argument! ");
 			e.printStackTrace();
 		} catch (IOException e) {
-<<<<<<< HEAD
 			out.println("Failed to create output stream!");
 			e.printStackTrace();
-		}
-	}
-}
-=======
-			System.out.println("Failed to create output stream!");
-			e.printStackTrace();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-
 }
->>>>>>> f24fbcddec168089c57d158949eb88d1e93e1286
