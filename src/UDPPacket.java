@@ -6,23 +6,9 @@ public class UDPPacket implements Serializable {
 	private String filename;
 	private long fileSize;
 	private byte[] fileData;
-<<<<<<< HEAD
-	private int seq;
-
-	public int getSeq() {
-		return seq;
-	}
-	
-	public void setSeq(int seq) {
-		this.seq = seq;
-	}
-	
-=======
-	private String status;
 	private int seq;
 	private int ack;
 
->>>>>>> f24fbcddec168089c57d158949eb88d1e93e1286
 	public String getFilename() {
 		return filename;
 	}
