@@ -35,13 +35,14 @@ public class URFTServer {
 				SEQ = packet.getSeq();
 				list.add(packet);
 
-
+        //delete duplicate packets
 				hs.addAll(list);
 
 
 
 
 				boolean done = false;
+        //sort the packets with correct seq number
 				if(hs.size() == packet.getSegments()){
 
 					for(int it = 0; it < hs.size();it++){
