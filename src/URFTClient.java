@@ -71,15 +71,6 @@ public class URFTClient {
 	  				DatagramPacket inputPacket = new DatagramPacket(response, response.length);
 	  				try {
 	  					dataSocket.receive(inputPacket);
-	  					/*if (lastReceivedAck >= 0 && lastReceivedAck < 9) {
-	  						ACK = new String(inputPacket.getData(), 0, 1);
-	  					}
-	  					else if (lastReceivedAck >= 9 && lastReceivedAck < 99) {
-	  						ACK = new String(inputPacket.getData(), 0, 2);
-	  					}
-	  					else {
-	  						ACK = new String(inputPacket.getData());
-	  					}*/
 	  					ACK = new String(inputPacket.getData()).trim();
 	  					//System.out.println("String: " + ACK + " Length: " + ACK.length());
 	  					if (Integer.parseInt(ACK) == 0) {

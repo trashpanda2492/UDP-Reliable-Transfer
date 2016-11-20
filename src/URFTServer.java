@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,8 +18,8 @@ public class URFTServer {
 	Set<UDPPacket> hs = new HashSet<>();
 	List<UDPPacket> sortedList = new ArrayList<UDPPacket>();
 
-
 	public void createSocketAndListen(int port, String path) {
+		int counter = 0;
 		try {
 			DatagramSocket socket = new DatagramSocket(port);
 			out.println("Server listening on port " + port);
@@ -31,25 +32,30 @@ public class URFTServer {
 				ObjectInputStream is = new ObjectInputStream(in);
 				packet = (UDPPacket) is.readObject();
 				out.println("Packet " + packet.getSeq() + " has been received!");
+				while(list.size() < packet.getSegments()) list.add(null);
 				SEQ = packet.getSeq();
-				list.add(packet);
-
-        //delete duplicate packets
-				hs.addAll(list);
-
-				boolean done = false;
-        //sort the packets with correct seq number
-				if(hs.size() == packet.getSegments()){
-
+				if (list.get(SEQ) == null) {
+					list.add(SEQ, packet);
+					counter++;
+					out.println("Counter: " + counter);
+				}
+				
+				//sort the packets with correct seq number
+				if(counter == packet.getSegments()){
+					for(int i = 0; i < list.size(); i++) {
+						System.out.println(list.get(i));
+					}
+					//delete duplicate packets
+					hs.addAll(list);
+					System.out.println(hs.size());
 					for(int it = 0; it < hs.size();it++){
 						for(UDPPacket p : hs){
-							if( p.getSeq() == it ){
+							if(p.getSeq() == it ){
 								sortedList.add(p);
 							}
 
 						}
 					}
-
 
 					for(int i = 0; i <sortedList.size();i++){
 						if (i == 0) {
@@ -60,12 +66,11 @@ public class URFTServer {
 
 						fileOutputStream.write(sortedList.get(i).getFileData());
 						if(i == list.size()-1){
-							done =true;
 							fileOutputStream.flush();
 						}
 					}
 				}
-
+				
 				// send back ACK
 				String reply = null;
 				try{InetAddress IPAddress = incomingPacket.getAddress();
