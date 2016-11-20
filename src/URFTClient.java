@@ -22,13 +22,13 @@ public class URFTClient {
 
 				int bytes = 0, offset = 0;
 				byte[] fileBuffer = new byte[(int)file.length()];
-				while(bytes < fileBuffer .length && (offset = di.read(fileBuffer, bytes, fileBuffer.length - bytes)) >= 0){
+				while(bytes < fileBuffer.length && (offset = di.read(fileBuffer, bytes, fileBuffer.length - bytes)) >= 0){
 					bytes += offset;
 				}
 
 				packet.setFileSize(file.length());
 				//packet.setFileData(fileBuffer);
-				int segments = (int)Math.ceil(file.length()/512);
+				int segments = (int)(Math.ceil((double)file.length()/512));
 				System.out.println("Number of segments: " + segments);
 				int seq = 0;
 				int bytesRead = 0;
@@ -45,29 +45,40 @@ public class URFTClient {
 					packet.setFileData(payload);
 					packet.setSeq(seq);
 					packet.setPayloadSize(payload.length);
-					objectOutput.writeInt(segments);
+					packet.setSegments(segments);
 					objectOutput.writeObject(packet);
+          
 					byte[] packetBytes = output.toByteArray();
+          System.out.println(packetBytes.length);
 					DatagramPacket upload = new DatagramPacket(packetBytes, packetBytes.length, IPAddress, port);
 					dataSocket.send(upload);
+                                  
+          objectOutput.flush();
+          objectOutput.close();
+          output.flush();
+          output.close();
+          
 					System.out.println("File packet (Sequence number " + seq + " has been uploaded from client");
 					bytesRead += payload.length;
 					seq ++;
 					bytesLeft -= payload.length;		
 				}
 				
-				byte[] response = new byte[512];
-				DatagramPacket inputPacket = new DatagramPacket(response, response.length);
-				dataSocket.receive(inputPacket);
-				String ACK = new String(inputPacket.getData());
-				//if(!ACK.equalsIgnoreCase("done")){
-					System.out.println("Acknowledge from server: " + ACK);
-				//}
-				//else{
-				//	dataSocket.close();
-				//	di.close();
-				//	System.exit(0);
-				//}
+        while(true){
+  				byte[] response = new byte[512];
+  				DatagramPacket inputPacket = new DatagramPacket(response, response.length);
+  				dataSocket.receive(inputPacket);
+  				String ACK = new String(inputPacket.getData());
+  				if(ACK.equalsIgnoreCase("done")){
+            dataSocket.close();
+  					di.close();
+  					System.exit(0);
+
+  				}
+  				else{
+  					System.out.println("Acknowledge from server: " + ACK);
+  				}
+        }
 
 
 			}

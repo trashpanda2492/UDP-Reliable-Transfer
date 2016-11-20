@@ -8,6 +8,7 @@ public class UDPPacket implements Serializable {
 	private byte[] fileData;
 	private int seq;
 	private int payloadSize;
+  private int segments;
 
 	public String getFilename() {
 		return filename;
@@ -47,5 +48,13 @@ public class UDPPacket implements Serializable {
 	
 	public void setPayloadSize(int payloadSize) {
 		this.payloadSize = payloadSize;
+	}
+ 
+ public int getSegments() {
+		return this.segments;
+	}
+	
+	public void setSegments(int segments) {
+		this.segments = segments;
 	}
 } // UDPPacket class
