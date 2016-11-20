@@ -71,7 +71,7 @@ public class URFTClient {
 	  				DatagramPacket inputPacket = new DatagramPacket(response, response.length);
 	  				try {
 	  					dataSocket.receive(inputPacket);
-	  					if (lastReceivedAck >= 0 && lastReceivedAck < 9) {
+	  					/*if (lastReceivedAck >= 0 && lastReceivedAck < 9) {
 	  						ACK = new String(inputPacket.getData(), 0, 1);
 	  					}
 	  					else if (lastReceivedAck >= 9 && lastReceivedAck < 99) {
@@ -79,7 +79,8 @@ public class URFTClient {
 	  					}
 	  					else {
 	  						ACK = new String(inputPacket.getData());
-	  					}
+	  					}*/
+	  					ACK = new String(inputPacket.getData()).trim();
 	  					//System.out.println("String: " + ACK + " Length: " + ACK.length());
 	  					if (Integer.parseInt(ACK) == 0) {
 	  						System.out.println("ACK from server: " + ACK);
@@ -99,7 +100,7 @@ public class URFTClient {
 	  						dataSocket.send(packetList.get(lastReceivedAck + 1));
 	  					}
 	  				} catch(SocketTimeoutException e) {
-	  					System.out.println("Packet timed out! Resending packet: " + lastReceivedAck + 1);
+	  					System.out.println("Packet timed out! Resending packet: " + (lastReceivedAck + 1));
 	  					dataSocket.send(packetList.get(lastReceivedAck + 1));
 	  				}
 		        }
