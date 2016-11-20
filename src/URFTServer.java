@@ -19,7 +19,6 @@ public class URFTServer {
 	List<UDPPacket> sortedList = new ArrayList<UDPPacket>();
 
 	public void createSocketAndListen(int port, String path) {
-		int counter = 0;
 		try {
 			DatagramSocket socket = new DatagramSocket(port);
 			out.println("Server listening on port " + port);
@@ -32,18 +31,22 @@ public class URFTServer {
 				ObjectInputStream is = new ObjectInputStream(in);
 				packet = (UDPPacket) is.readObject();
 				out.println("Packet " + packet.getSeq() + " has been received!");
-				while(list.size() < packet.getSegments()) list.add(null);
 				SEQ = packet.getSeq();
+				if (SEQ == 0) {
+					while (list.size() < packet.getSegments()) list.add(null);
+				}
+				//out.println("Size of list: " + list.size());
 				if (list.get(SEQ) == null) {
-					list.add(SEQ, packet);
-					counter++;
-					out.println("Counter: " + counter);
+					list.set(SEQ, packet);
+					/*for(int i = 0; i < list.size(); i++) {
+						System.out.println("Seq " + SEQ + " -> List @" + i + " " + list.get(i));
+					}*/
 				}
 				
 				//sort the packets with correct seq number
-				if(counter == packet.getSegments()){
-					for(int i = 0; i < list.size(); i++) {
-						System.out.println(list.get(i));
+				if(!list.contains(null)){
+					/*for(int i = 0; i < list.size(); i++) {
+						System.out.println("List @" + i + " " + list.get(i));
 					}
 					//delete duplicate packets
 					hs.addAll(list);
@@ -53,18 +56,20 @@ public class URFTServer {
 							if(p.getSeq() == it ){
 								sortedList.add(p);
 							}
-
 						}
 					}
+					for(int i = 0; i < sortedList.size(); i++) {
+						System.out.println("SortedList @" + i + " " + sortedList.get(i));
+					}*/
 
-					for(int i = 0; i <sortedList.size();i++){
+					for(int i = 0; i <list.size();i++){
 						if (i == 0) {
-							outputFile = path + "/" + sortedList.get(i).getFilename();
+							outputFile = path + "/" + list.get(i).getFilename();
 							dstFile = new File(outputFile);
 							fileOutputStream = new FileOutputStream(dstFile);
 						}
 
-						fileOutputStream.write(sortedList.get(i).getFileData());
+						fileOutputStream.write(list.get(i).getFileData());
 						if(i == list.size()-1){
 							fileOutputStream.flush();
 						}
