@@ -30,15 +30,12 @@ public class URFTServer {
 				ByteArrayInputStream in = new ByteArrayInputStream(data);
 				ObjectInputStream is = new ObjectInputStream(in);
 				packet = (UDPPacket) is.readObject();
-				out.println("Packet " + packet.getSeq() + " has been recieved!");
+				out.println("Packet " + packet.getSeq() + " has been received!");
 				SEQ = packet.getSeq();
 				list.add(packet);
 
         //delete duplicate packets
 				hs.addAll(list);
-
-
-
 
 				boolean done = false;
         //sort the packets with correct seq number
@@ -73,10 +70,7 @@ public class URFTServer {
 				String reply = null;
 				try{InetAddress IPAddress = incomingPacket.getAddress();
 				int incomingPort = incomingPacket.getPort();
-				if(!done)
-					reply = "" + SEQ;
-				else
-					reply = "done";
+				reply = "" + SEQ;
 				byte[] replyBytes = reply.getBytes();
 				DatagramPacket replyPacket = new DatagramPacket(replyBytes, replyBytes.length, IPAddress, incomingPort);
 				socket.send(replyPacket);

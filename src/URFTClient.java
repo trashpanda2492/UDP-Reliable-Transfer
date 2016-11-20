@@ -1,9 +1,10 @@
 import java.net.*;
-import java.util.Arrays;
+import java.util.*;
 import java.io.*;
 
 public class URFTClient {
-
+	static ArrayList<DatagramPacket> packetList = new ArrayList<DatagramPacket>();
+	
 	public static void main(String[] args) {
 		String ip = args[1];
 		int port = Integer.parseInt(args[3]);
@@ -28,6 +29,7 @@ public class URFTClient {
 
 				packet.setFileSize(file.length());
 				//packet.setFileData(fileBuffer);
+				int lastReceivedAck = 0;
 				int segments = (int)(Math.ceil((double)file.length()/512));
 				int seq = 0;
 				int bytesRead = 0;
@@ -50,35 +52,57 @@ public class URFTClient {
 					byte[] packetBytes = output.toByteArray();
 					DatagramPacket upload = new DatagramPacket(packetBytes, packetBytes.length, IPAddress, port);
 					dataSocket.send(upload);
+					packetList.add(seq, upload);
                                   
-          objectOutput.flush();
-          objectOutput.close();
-          output.flush();
-          output.close();
+					objectOutput.flush();
+					objectOutput.close();
+					output.flush();
+					output.close();
           
 					System.out.println("Packet " + seq + " has been sent from client");
 					bytesRead += payload.length;
 					seq ++;
-					bytesLeft -= payload.length;		
+					bytesLeft -= payload.length;
 				}
-				
-        while(true){
-  				byte[] response = new byte[512];
-  				DatagramPacket inputPacket = new DatagramPacket(response, response.length);
-  				dataSocket.receive(inputPacket);
-  				String ACK = new String(inputPacket.getData());
-  				if(ACK.equalsIgnoreCase("done")){
-  					dataSocket.close();
-  					di.close();
-  					System.exit(0);
-
-  				}
-  				else{
-  					System.out.println("ACK from server: " + ACK);
-  				}
-        }
-
-
+				while(true){
+					String ACK;
+					dataSocket.setSoTimeout(1000);
+	  				byte[] response = new byte[3];
+	  				DatagramPacket inputPacket = new DatagramPacket(response, response.length);
+	  				try {
+	  					dataSocket.receive(inputPacket);
+	  					if (lastReceivedAck >= 0 && lastReceivedAck < 9) {
+	  						ACK = new String(inputPacket.getData(), 0, 1);
+	  					}
+	  					else if (lastReceivedAck >= 9 && lastReceivedAck < 99) {
+	  						ACK = new String(inputPacket.getData(), 0, 2);
+	  					}
+	  					else {
+	  						ACK = new String(inputPacket.getData());
+	  					}
+	  					//System.out.println("String: " + ACK + " Length: " + ACK.length());
+	  					if (Integer.parseInt(ACK) == 0) {
+	  						System.out.println("ACK from server: " + ACK);
+	  					}
+	  					else if (Integer.parseInt(ACK) == (lastReceivedAck + 1)) {
+	  						System.out.println("ACK from server: " + ACK);
+	  						lastReceivedAck++;
+	  						if (Integer.parseInt(ACK) == (segments - 1)) {
+	  							System.out.println("File uploaded successfully!");
+	  							dataSocket.close();
+			  					di.close();
+			  					System.exit(0);
+	  						}
+		  				}
+	  					else {
+	  						System.out.println("Out of order ACK, resending packet: " + (lastReceivedAck + 1));
+	  						dataSocket.send(packetList.get(lastReceivedAck + 1));
+	  					}
+	  				} catch(SocketTimeoutException e) {
+	  					System.out.println("Packet timed out! Resending packet: " + lastReceivedAck + 1);
+	  					dataSocket.send(packetList.get(lastReceivedAck + 1));
+	  				}
+		        }
 			}
 			else{
 				System.out.println("File not found!");

@@ -8,7 +8,7 @@ public class UDPPacket implements Serializable {
 	private byte[] fileData;
 	private int seq;
 	private int payloadSize;
-  private int segments;
+	private int segments;
 
 	public String getFilename() {
 		return filename;
