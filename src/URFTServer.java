@@ -19,7 +19,6 @@ public class URFTServer {
 
 
 	public void createSocketAndListen(int port, String path) {
-		int count;
 		try {
 			DatagramSocket socket = new DatagramSocket(port);
 			out.println("Server listening on port " + port);
@@ -31,7 +30,7 @@ public class URFTServer {
 				ByteArrayInputStream in = new ByteArrayInputStream(data);
 				ObjectInputStream is = new ObjectInputStream(in);
 				packet = (UDPPacket) is.readObject();
-				out.println("Seqence Number " + packet.getSeq() + "has been recieved!");
+				out.println("Packet " + packet.getSeq() + " has been recieved!");
 				SEQ = packet.getSeq();
 				list.add(packet);
 

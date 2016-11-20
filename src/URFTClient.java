@@ -29,7 +29,6 @@ public class URFTClient {
 				packet.setFileSize(file.length());
 				//packet.setFileData(fileBuffer);
 				int segments = (int)(Math.ceil((double)file.length()/512));
-				System.out.println("Number of segments: " + segments);
 				int seq = 0;
 				int bytesRead = 0;
 				int bytesLeft =  fileBuffer.length;
@@ -49,7 +48,6 @@ public class URFTClient {
 					objectOutput.writeObject(packet);
           
 					byte[] packetBytes = output.toByteArray();
-          System.out.println(packetBytes.length);
 					DatagramPacket upload = new DatagramPacket(packetBytes, packetBytes.length, IPAddress, port);
 					dataSocket.send(upload);
                                   
@@ -58,7 +56,7 @@ public class URFTClient {
           output.flush();
           output.close();
           
-					System.out.println("File packet (Sequence number " + seq + " has been uploaded from client");
+					System.out.println("Packet " + seq + " has been sent from client");
 					bytesRead += payload.length;
 					seq ++;
 					bytesLeft -= payload.length;		
@@ -70,13 +68,13 @@ public class URFTClient {
   				dataSocket.receive(inputPacket);
   				String ACK = new String(inputPacket.getData());
   				if(ACK.equalsIgnoreCase("done")){
-            dataSocket.close();
+  					dataSocket.close();
   					di.close();
   					System.exit(0);
 
   				}
   				else{
-  					System.out.println("Acknowledge from server: " + ACK);
+  					System.out.println("ACK from server: " + ACK);
   				}
         }
 
