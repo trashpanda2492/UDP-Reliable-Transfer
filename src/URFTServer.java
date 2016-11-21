@@ -29,39 +29,20 @@ public class URFTServer {
 				byte[] data = incomingPacket.getData();
 				ByteArrayInputStream in = new ByteArrayInputStream(data);
 				ObjectInputStream is = new ObjectInputStream(in);
+				// unwrap packet
 				packet = (UDPPacket) is.readObject();
 				out.println("Packet " + packet.getSeq() + " has been received!");
 				SEQ = packet.getSeq();
+				// add packets to list in order based on sequence
 				if (SEQ == 0) {
 					while (list.size() < packet.getSegments()) list.add(null);
 				}
-				//out.println("Size of list: " + list.size());
 				if (list.get(SEQ) == null) {
 					list.set(SEQ, packet);
-					/*for(int i = 0; i < list.size(); i++) {
-						System.out.println("Seq " + SEQ + " -> List @" + i + " " + list.get(i));
-					}*/
 				}
 				
-				//sort the packets with correct seq number
+				// write packet data to a file
 				if(!list.contains(null)){
-					/*for(int i = 0; i < list.size(); i++) {
-						System.out.println("List @" + i + " " + list.get(i));
-					}
-					//delete duplicate packets
-					hs.addAll(list);
-					System.out.println(hs.size());
-					for(int it = 0; it < hs.size();it++){
-						for(UDPPacket p : hs){
-							if(p.getSeq() == it ){
-								sortedList.add(p);
-							}
-						}
-					}
-					for(int i = 0; i < sortedList.size(); i++) {
-						System.out.println("SortedList @" + i + " " + sortedList.get(i));
-					}*/
-
 					for(int i = 0; i <list.size();i++){
 						if (i == 0) {
 							outputFile = path + "/" + list.get(i).getFilename();

@@ -21,6 +21,7 @@ public class URFTClient {
 				DataInputStream di = new DataInputStream(new FileInputStream(file));
 				DatagramSocket dataSocket = new DatagramSocket();
 
+				// read file
 				int bytes = 0, offset = 0;
 				byte[] fileBuffer = new byte[(int)file.length()];
 				while(bytes < fileBuffer.length && (offset = di.read(fileBuffer, bytes, fileBuffer.length - bytes)) >= 0){
@@ -28,12 +29,12 @@ public class URFTClient {
 				}
 
 				packet.setFileSize(file.length());
-				//packet.setFileData(fileBuffer);
 				int lastReceivedAck = 0;
 				int segments = (int)(Math.ceil((double)file.length()/512));
 				int seq = 0;
 				int bytesRead = 0;
 				int bytesLeft =  fileBuffer.length;
+				// package file data into packets and set header
 				while(bytesRead < fileBuffer.length){
 					ByteArrayOutputStream output = new ByteArrayOutputStream();
 					ObjectOutputStream objectOutput = new ObjectOutputStream(output);
@@ -72,7 +73,6 @@ public class URFTClient {
 	  				try {
 	  					dataSocket.receive(inputPacket);
 	  					ACK = new String(inputPacket.getData()).trim();
-	  					//System.out.println("String: " + ACK + " Length: " + ACK.length());
 	  					if (Integer.parseInt(ACK) == 0) {
 	  						System.out.println("ACK from server: " + ACK);
 	  					}
