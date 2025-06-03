@@ -1,0 +1,1 @@
+Simple app written in Java that reliably transfers files to a server using User Datagram Protocol (UDP). Acknowledgements (ACK) are sent for each packet received in order, while packets are retransmitted if they timeout or an ACK is received out of order. Length of timeout is 1 second.
